@@ -12,4 +12,8 @@ inData = input('Input: ')
 
 clientSocket.send(inData.encode())
 
+res = clientSocket.recv(1024).decode()
+
+print('Echo: ', res)
+
 clientSocket.close()

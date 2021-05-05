@@ -10,8 +10,12 @@ serverSocket.listen(1)
 
 print('Server Online')
 
-while True:
+open = True
+
+while open:
     connectedSocket, address = serverSocket.accept()
     req = connectedSocket.recv(1024).decode()
-    print(req)
+    connectedSocket.send(req.encode())
+    open = False
     connectedSocket.close()
+
