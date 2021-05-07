@@ -8,12 +8,29 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 
 clientSocket.connect((serverName, portNum))
 
-inData = input('Input: ')
+stopCodes = ["EXIT", "exit", "STOP", "stop"]
+open = True
 
-clientSocket.send(inData.encode())
+while open:
+    inData = input('Input: ')
+    if inData == "":
+        continue
+    
+    print("")
+    amtReceived = 0
+    amtExp = len(inData)
 
-res = clientSocket.recv(1024).decode()
+    clientSocket.sendall(inData.encode())
+    if stopCodes.count(inData) > 0 or inData == "quit":
+        clientSocket.close()
+        open = False
+        break
+    
+    while amtReceived < amtExp:
+        res = clientSocket.recv(1024).decode()
+        print('Echo from server: ', res)
+        amtReceived += len(res)
+    
+    print("-------------------------------")
+    
 
-print('Echo: ', res)
-
-clientSocket.close()

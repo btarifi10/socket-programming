@@ -6,16 +6,30 @@ serverSocket = socket(AF_INET, SOCK_STREAM)
 
 serverSocket.bind(('', portNum))
 
-serverSocket.listen(1)
+serverSocket.listen()
 
 print('Server Online')
 
-open = True
+online = True
 
-while open:
+stopCodes = ["EXIT", "exit", "STOP", "stop"]
+
+while online:
     connectedSocket, address = serverSocket.accept()
-    req = connectedSocket.recv(1024).decode()
-    connectedSocket.send(req.encode())
-    open = False
-    connectedSocket.close()
+    connectionOpen = True
+    while connectionOpen:
+        req = connectedSocket.recv(1024).decode()
+        if not req:
+            break
+        if stopCodes.count(req) == 0:
+            connectedSocket.sendall(req.encode())
+        else:
+            connectedSocket.close()
+            connectionOpen = False
+        if req == "quit":
+            connectedSocket.close()
+            serverSocket.close()
+            online = False
+            connectionOpen = False
+
 
