@@ -9,6 +9,8 @@ addr = (serverName, portNum)
 bufferSize = 1024
 format = 'utf-8'
 
+exitMsg = "EXIT"
+
 # Create UDP socket
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 
@@ -25,6 +27,8 @@ while True:
     message = input('Input: ')
     if message == "":
         continue
+    if message == exitMsg:
+        break
     sendMessageUDP(message)
     
 

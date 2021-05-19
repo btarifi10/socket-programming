@@ -23,10 +23,12 @@ def sendMessage(message):
         return
     bytesReceived = 0
     bytesExpected = len(message)
+    response = ""
     while bytesReceived < bytesExpected:
-        response = clientSocket.recv(bufferSize).decode(format)
-        print('Echo from server: ', response)
-        bytesReceived += len(response)
+        res = clientSocket.recv(bufferSize).decode(format)
+        response = response + res
+        bytesReceived += len(res)
+    print('Echo from server: ', response)
     print("-------------------------------")
 
 # Initially, socket is open

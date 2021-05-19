@@ -1,41 +1,43 @@
 from socket import *
 import threading
-
-def serverThread(connectedSocket, threadId, stopCodes):
-    connectionOpen = True
-    while connectionOpen:
-        req = connectedSocket.recv(1024).decode()
-        print(req + "from thread", threadId)
-        if not req:
-            break
-        if stopCodes.count(req) == 0:
-            connectedSocket.sendall(req.encode())
-        else:
-            connectedSocket.close()
-            connectionOpen = False
-
+# Setting up server address details
 portNum = 42069
+serverName = gethostbyname(gethostname())
+addr = (serverName, portNum)
 
+# Communication standards
+bufferSize = 1024
+disconnectMsg = "SHEESH!"
+format = 'utf-8'
+
+# Create socket
 serverSocket = socket(AF_INET, SOCK_STREAM)
 
-serverSocket.bind(('', portNum))
-
+# Bind to address and listen 
+serverSocket.bind(addr)
 serverSocket.listen()
 
-print('Server Online')
+def handleClient(conn, addr):
+    print(f"[CONNECTED] {addr} on {threading.current_thread().getName()}")
+    print(f"[ACTIVE CLIENTS] {threading.active_count() - 1}")
+    connectionOpen = True
+    while connectionOpen:
+        message = connectedSocket.recv(bufferSize).decode(format)
+        if not message:
+            break
+        if message == disconnectMsg:
+            connectionOpen = False
+            print(f"[DISCONNECTED] {addr}")
+        else:
+            print(f"[{addr}] {message}")
+            connectedSocket.sendall(message.encode(format))
 
 online = True
-
-stopCodes = ["EXIT", "exit", "STOP", "stop"]
-
-threadsRunning = []
+print(f'[ONLINE] Server is listening on {serverName}:{portNum}...')     
 
 while online:
     connectedSocket, address = serverSocket.accept()
-    threadId = len(threadsRunning)
-    th = threading.Thread(target=serverThread, args=(connectedSocket, threadId, stopCodes))
-    th.start()
-    threadsRunning.append(th)
-
+    tcpRunner = threading.Thread(target=handleClient, args=(connectedSocket, address))
+    tcpRunner.start()
 
 

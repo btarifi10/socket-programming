@@ -1,33 +1,36 @@
 from socket import *
-
 import threading
 
-def serverThread(req, address, threadId):
-    print(req.decode() + "on server thread", threadId)
-    serverSocket.sendto(req, address)
+# Setting up server address details
+portNum = 42070
+serverName = gethostbyname(gethostname())
+addr = (serverName, portNum)
 
-portNum = 42069
+# Communication standards
+bufferSize = 1024
+format = 'utf-8'
 
 serverSocket = socket(AF_INET, SOCK_DGRAM)
 
-serverSocket.bind(('', portNum))
+serverSocket.bind(addr)
 
-print('Server Online')
 
-threadsRunning = []
-addresses = []
+def handleRequestUDP(message, address):
+    print(f"[{address} on {threading.current_thread().getName()}] {message.decode(format)}")
+    serverSocket.sendto(message, address)
+    threading.current_thread().join()
 
-while True:
-    req, address = serverSocket.recvfrom(1024)
-    if addresses.count(address) == 0:
-        addresses.append(address)
-    if not req:
+
+print('[ONLINE] UDP Server is online...')
+
+online = True
+
+while online:
+    message, address = serverSocket.recvfrom(bufferSize)
+    if not message:
         break
-    threadId = addresses.index(address)
-    th = threading.Thread(target=serverThread, args=(req, address, threadId))
-    th.start()
-    threadsRunning.append(th)
+    udpRunner = threading.Thread(target=handleRequestUDP, args=(message, address))
+    udpRunner.start()
 
-    
 
 
