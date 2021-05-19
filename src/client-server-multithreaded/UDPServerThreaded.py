@@ -18,7 +18,6 @@ serverSocket.bind(addr)
 def handleRequestUDP(message, address):
     print(f"[{address} on {threading.current_thread().getName()}] {message.decode(format)}")
     serverSocket.sendto(message, address)
-    threading.current_thread().join()
 
 
 print('[ONLINE] UDP Server is online...')
