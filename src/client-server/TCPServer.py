@@ -1,35 +1,41 @@
 from socket import *
 
+# Setting up server address details
 portNum = 42069
+serverName = gethostbyname(gethostname())
+addr = (serverName, portNum)
 
+# Communication standards
+bufferSize = 1024
+disconnectMsg = "SHEESH!"
+format = 'utf-8'
+
+# Create socket
 serverSocket = socket(AF_INET, SOCK_STREAM)
 
-serverSocket.bind(('', portNum))
-
+# Bind to address and listen 
+serverSocket.bind(addr)
 serverSocket.listen()
 
-print('Server Online')
+def handleClient(conn, addr):
+    print(f"[CONNECTED] {addr}")
+    connectionOpen = True
+    while connectionOpen:
+        message = connectedSocket.recv(bufferSize).decode(format)
+        if not message:
+            break
+        if message == disconnectMsg:
+            connectionOpen = False
+            print(f"[DISCONNECTED] {addr}")
+        else:
+            print(f"[{addr}] {message}")
+            connectedSocket.sendall(message.encode(format))
 
 online = True
-
-stopCodes = ["EXIT", "exit", "STOP", "stop"]
+print(f'[ONLINE] Server is listening on {serverName}, port {portNum}...')     
 
 while online:
     connectedSocket, address = serverSocket.accept()
-    connectionOpen = True
-    while connectionOpen:
-        req = connectedSocket.recv(1024).decode()
-        if not req:
-            break
-        if stopCodes.count(req) == 0:
-            connectedSocket.sendall(req.encode())
-        else:
-            connectedSocket.close()
-            connectionOpen = False
-        if req == "quit":
-            connectedSocket.close()
-            serverSocket.close()
-            online = False
-            connectionOpen = False
+    handleClient(connectedSocket, address)
 
 

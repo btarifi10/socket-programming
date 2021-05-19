@@ -1,36 +1,49 @@
 from socket import *
 
+# Setting up server address details
 portNum = 42069
+serverName = gethostbyname(gethostname())
+addr = (serverName, portNum)
 
-serverName = 'localhost'
+# Communication standards
+bufferSize = 1024
+disconnectMsg = "SHEESH!"
+format = 'utf-8'
 
+# Create socket
 clientSocket = socket(AF_INET, SOCK_STREAM)
+# Connect to address via socket
+clientSocket.connect(addr)
 
-clientSocket.connect((serverName, portNum))
+# Function to handle message sending and receiving
+def sendMessage(message):
+    msg = message.encode(format)
+    clientSocket.sendall(message.encode(format))
+    if message == disconnectMsg:
+        return
+    bytesReceived = 0
+    bytesExpected = len(message)
+    while bytesReceived < bytesExpected:
+        response = clientSocket.recv(bufferSize).decode(format)
+        print('Echo from server: ', response)
+        bytesReceived += len(response)
+    print("-------------------------------")
 
-stopCodes = ["EXIT", "exit", "STOP", "stop"]
+# Initially, socket is open
 open = True
-
 while open:
-    inData = input('Input: ')
-    if inData == "":
+    message = input('Input: ')
+    if message == "":
         continue
     
-    print("")
-    amtReceived = 0
-    amtExp = len(inData)
-
-    clientSocket.sendall(inData.encode())
-    if stopCodes.count(inData) > 0 or inData == "quit":
+    # Always send message
+    # Close immediately if disconnect
+    sendMessage(message)
+    if message == disconnectMsg:
         clientSocket.close()
         open = False
         break
     
-    while amtReceived < amtExp:
-        res = clientSocket.recv(1024).decode()
-        print('Echo from server: ', res)
-        amtReceived += len(res)
-    
-    print("-------------------------------")
+
     
 

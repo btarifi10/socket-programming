@@ -1,34 +1,30 @@
 from socket import *
 
-portNum = 42069
+# Setting up server address details
+portNum = 42070
+serverName = gethostbyname(gethostname())
+addr = (serverName, portNum)
 
-serverName = 'localhost'
+# Communication standards
+bufferSize = 1024
+format = 'utf-8'
 
+# Create UDP socket
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 
-stopCodes = ["EXIT", "exit", "STOP", "stop"]
-open = True
-
-bufferSize = 1024
-
-while open:
-    inData = input('Input: ')
-    if inData == "":
-        continue
-    if stopCodes.count(inData) > 0 or inData == "quit":
-        inData = clientSocket.sendto(inData.encode(), (serverName, portNum))
-        clientSocket.close()
-        open = False
-        break
-    
-    print("")
-
-    while inData:
-        numBytesSent = clientSocket.sendto(inData[:bufferSize].encode(), (serverName, portNum))
-        inData = inData[numBytesSent:]
-        res = clientSocket.recv(bufferSize).decode()
-        print('Echo from server: ', res)
+def sendMessageUDP(message):
+    while message:
+        bytesSent = clientSocket.sendto(message[:bufferSize].encode(format), addr)
+        message = message[bytesSent:]
+        response = clientSocket.recv(bufferSize).decode(format)
+        print('Echo from server: ', response)
     
     print("-------------------------------")
+
+while True:
+    message = input('Input: ')
+    if message == "":
+        continue
+    sendMessageUDP(message)
     
 
